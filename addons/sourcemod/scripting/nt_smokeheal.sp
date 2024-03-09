@@ -7,7 +7,7 @@
 #pragma newdecls required
 
 
-#define PLUGIN_VERSION "0.1.0"
+#define PLUGIN_VERSION "0.2.0"
 
 #define MAX_SMOKES NEO_MAXPLAYERS*2
 #define SMOKE_FADE_DURATION 2.0 // Time it takes for smoke to fully fade in/out
@@ -33,6 +33,8 @@ public Plugin myinfo = {
 	version = PLUGIN_VERSION,
 	url = "https://github.com/Rainyan/sourcemod-nt-smokeheal"
 };
+
+float _last_heal[NEO_MAXPLAYERS];
 
 enum SmokeStatus {
 	FADE_IN, // Smoke is currently deploying, but not full bloomed yet.
@@ -81,6 +83,7 @@ enum struct Smoke {
 	void RadiusHeal()
 	{
 		int heal_amount = RoundToNearest(HEAL_PER_SECOND / HEAL_INTERVAL);
+		float time = GetGameTime();
 		for (int client = 1; client <= MaxClients; ++client)
 		{
 			if (!IsClientInGame(client) || !IsPlayerAlive(client) ||
@@ -88,7 +91,14 @@ enum struct Smoke {
 			{
 				continue;
 			}
+
+			float dt = time - _last_heal[client];
+			if (dt < HEAL_INTERVAL)
+			{
+				continue;
+			}
 			Heal(client, heal_amount);
+			_last_heal[client] = time;
 		}
 	}
 }
@@ -111,6 +121,11 @@ public void OnPluginStart()
 	CreateTimer(HEAL_INTERVAL, Timer_Heal, _, TIMER_REPEAT);
 }
 
+public void OnClientDisconnect(int client)
+{
+	_last_heal[client] = 0.0;
+}
+
 public void OnMapStart()
 {
 	delete _smokes;
@@ -119,6 +134,11 @@ public void OnMapStart()
 	// on the stack, for example checking for 0 start time,
 	// to entirely avoid heap reallocations.
 	_smokes = new ArrayList(sizeof(Smoke));//, MAX_SMOKES);
+
+	for (int i = 0; i < sizeof(_last_heal); ++i)
+	{
+		_last_heal[i] = 0.0;
+	}
 }
 
 // Periodically heal players who are inside a smoke,
