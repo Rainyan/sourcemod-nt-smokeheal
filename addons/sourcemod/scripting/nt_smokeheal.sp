@@ -7,7 +7,7 @@
 #pragma newdecls required
 
 
-#define PLUGIN_VERSION "0.6.0"
+#define PLUGIN_VERSION "0.7.0"
 
 #define MAX_SMOKES NEO_MAXPLAYERS*2
 #define SMOKE_FADE_DURATION 2.0 // Time it takes for smoke to fully fade in/out
@@ -29,7 +29,7 @@ public Plugin myinfo = {
 	url = "https://github.com/Rainyan/sourcemod-nt-smokeheal"
 };
 
-ConVar _cvar_hps, _cvar_cooldown, _cvar_supheal;
+ConVar _cvar_cooldown, _cvar_hps, _cvar_maxheal, _cvar_supheal;
 
 float _last_heal[NEO_MAXPLAYERS+1];
 float _last_hurt[NEO_MAXPLAYERS+1];
@@ -117,13 +117,16 @@ public void OnPluginStart()
 {
 	_cvar_hps = CreateConVar("sm_smokeheal_hps", "5.0",
 		"Amount to heal per second.",
-		_, true, 0.0, true, 100.0);
+		_, true, 0.0);
 	_cvar_cooldown = CreateConVar("sm_smokeheal_cooldown", "1.0",
 		"Cooldown since player hurt until they can start healing.",
 		_, true, 0.0);
 	_cvar_supheal = CreateConVar("sm_smokeheal_supheal", "1",
 		"Modifier for the heal amount for support targets.",
 		_, true, 0.0, true, 1.0);
+	_cvar_maxheal = CreateConVar("sm_smokeheal_maxheal", "100",
+		"Up to what HP value to heal players, at most.",
+		_, true, 0.0);
 
 	Handle dd = new DynamicDetour(view_as<Address>(0x22107C40),
 		CallConv_THISCALL, ReturnType_Void, ThisPointer_CBaseEntity);
@@ -238,12 +241,12 @@ void Heal(int client, int amount)
 	}
 
 	int health = GetEntProp(client, Prop_Send, "m_iHealth");
-	if (health >= 100)
+	if (health >= _cvar_maxheal.IntValue)
 	{
 		return;
 	}
 
-	health = Min(100, health + amount);
+	health = Min(_cvar_maxheal.IntValue, health + amount);
 	SetEntProp(client, Prop_Send, "m_iHealth", health);
 
 	int color[4] = {
