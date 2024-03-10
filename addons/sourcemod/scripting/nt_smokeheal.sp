@@ -7,7 +7,7 @@
 #pragma newdecls required
 
 
-#define PLUGIN_VERSION "0.5.0"
+#define PLUGIN_VERSION "0.5.1"
 
 #define MAX_SMOKES NEO_MAXPLAYERS*2
 #define SMOKE_FADE_DURATION 2.0 // Time it takes for smoke to fully fade in/out
@@ -246,8 +246,8 @@ void Heal(int client, int amount)
 
 void FlashScreen(int client, int rgba[4])
 {
-	int in_time_ms = 66;
-	int hold_time_ms = 666;
+	int in_time_ms = 55;
+	int hold_time_ms = 555;
 	Handle msg = StartMessageOne("Fade", client);
 	BfWriteShort(msg, in_time_ms);
 	BfWriteShort(msg, hold_time_ms);
