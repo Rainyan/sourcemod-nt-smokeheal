@@ -7,7 +7,7 @@
 #pragma newdecls required
 
 
-#define PLUGIN_VERSION "0.7.0"
+#define PLUGIN_VERSION "0.7.1"
 
 #define MAX_SMOKES NEO_MAXPLAYERS*2
 #define SMOKE_FADE_DURATION 2.0 // Time it takes for smoke to fully fade in/out
@@ -169,7 +169,7 @@ public void OnMapStart()
 	// to entirely avoid heap reallocations.
 	_smokes = new ArrayList(sizeof(Smoke));//, MAX_SMOKES);
 
-	for (int i = 0; i < sizeof(_last_heal); ++i)
+	for (int i = 1; i <= MaxClients; ++i)
 	{
 		_last_heal[i] = 0.0;
 		_last_hurt[i] = 0.0;
