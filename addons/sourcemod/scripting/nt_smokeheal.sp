@@ -7,7 +7,7 @@
 #pragma newdecls required
 
 
-#define PLUGIN_VERSION "0.7.2"
+#define PLUGIN_VERSION "0.7.3"
 
 #define MAX_SMOKES NEO_MAXPLAYERS*2
 #define SMOKE_FADE_DURATION 2.0 // Time it takes for smoke to fully fade in/out
@@ -186,13 +186,13 @@ public Action Timer_Heal(Handle timer)
 		_smokes.GetArray(i, smoke);
 
 		SmokeStatus status = smoke.GetStatus();
-		if (status == EXPIRED)
-		{
-			_smokes.Erase(i--); // TODO: optimize
-		}
-		else if (status == FULL_BLOOM)
+		if (status == FULL_BLOOM)
 		{
 			smoke.RadiusHeal();
+		}
+		else if (status == EXPIRED)
+		{
+			_smokes.Erase(i--); // TODO: optimize
 		}
 	}
 	return Plugin_Continue;
