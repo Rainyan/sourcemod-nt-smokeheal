@@ -7,7 +7,7 @@
 #pragma newdecls required
 
 
-#define PLUGIN_VERSION "0.2.0"
+#define PLUGIN_VERSION "0.2.1"
 
 #define MAX_SMOKES NEO_MAXPLAYERS*2
 #define SMOKE_FADE_DURATION 2.0 // Time it takes for smoke to fully fade in/out
@@ -113,7 +113,7 @@ public void OnPluginStart()
 	{
 		SetFailState("Failed to create dynamic hook");
 	}
-	if (!DHookEnableDetour(dd, true, DeploySmoke))
+	if (!DHookEnableDetour(dd, true, Detonate))
 	{
 		SetFailState("Failed to detour");
 	}
@@ -165,17 +165,27 @@ public Action Timer_Heal(Handle timer)
 	return Plugin_Continue;
 }
 
-// Detour for catching new smoke puffs.
-MRESReturn DeploySmoke(int pThis)
+bool IsSmokeProjectile(int basegrenade)
 {
+	char classname[32];
+	if (!GetEntityClassname(basegrenade, classname, sizeof(classname)))
+	{
+		return false;
+	}
+	return StrEqual(classname, "smokegrenade_projectile");
+}
+
+MRESReturn Detonate(int pThis)
+{
+	// Some other kind of projectile going off
+	if (!IsSmokeProjectile(pThis))
+	{
+		return MRES_Ignored;
+	}
+
 	Smoke smoke;
 	GetEntPropVector(pThis, Prop_Send, "m_vecOrigin", smoke.pos);
 	smoke.start_time = GetGameTime();
-
-	//PrintToServer("Deployed smoke %d at: %f %f %f",
-	//	pThis,
-	//	smoke.pos[0], smoke.pos[1], smoke.pos[2]
-	//);
 
 	_smokes.PushArray(smoke); // TODO: optimize
 
