@@ -17,7 +17,7 @@
 
 #define HEAL_INTERVAL 1.0
 #define HEAL_PER_SECOND 5.0
-#define HURT_INTERVAL 1.0
+#define HURT_INTERVAL 1.0 // For how long player mustn't take dmg before they're eligible for healing
 
 #define FFADE_IN 0x1
 #define FFADE_OUT 0x2
