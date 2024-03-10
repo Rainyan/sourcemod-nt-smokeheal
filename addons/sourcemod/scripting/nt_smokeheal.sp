@@ -132,7 +132,7 @@ public void OnPluginStart()
 		CallConv_THISCALL, ReturnType_Void, ThisPointer_CBaseEntity);
 	if (dd == INVALID_HANDLE)
 	{
-		SetFailState("Failed to create dynamic hook");
+		SetFailState("Failed to create dynamic detour");
 	}
 	if (!DHookEnableDetour(dd, true, Detonate))
 	{
