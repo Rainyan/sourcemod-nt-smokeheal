@@ -17,6 +17,7 @@
 
 #define HEAL_INTERVAL 1.0
 #define HEAL_PER_SECOND 5.0
+#define HURT_INTERVAL 1.0
 
 #define FFADE_IN 0x1
 #define FFADE_OUT 0x2
@@ -36,6 +37,7 @@ public Plugin myinfo = {
 };
 
 float _last_heal[NEO_MAXPLAYERS+1];
+float _last_hurt[NEO_MAXPLAYERS+1];
 
 enum SmokeStatus {
 	FADE_IN, // Smoke is currently deploying, but not full bloomed yet.
@@ -98,6 +100,12 @@ enum struct Smoke {
 			{
 				continue;
 			}
+			// Prevent healing until HURT_INTERVAL since last taking damage
+			dt = time - _last_hurt[client];
+			if (dt < HURT_INTERVAL - TIMER_INACCURACY)
+			{
+				continue;
+			}
 			Heal(client, heal_amount);
 			_last_heal[client] = time;
 		}
@@ -119,12 +127,24 @@ public void OnPluginStart()
 	}
 	CloseHandle(dd);
 
+	if (!HookEventEx("player_hurt", OnPlayerHurt))
+	{
+		SetFailState("Failed to hook");
+	}
+
 	CreateTimer(HEAL_INTERVAL, Timer_Heal, _, TIMER_REPEAT);
+}
+
+void OnPlayerHurt(Event event, const char[] name, bool dontBroadcast)
+{
+	int victim = GetClientOfUserId(event.GetInt("userid"));
+	_last_hurt[victim] = GetGameTime();
 }
 
 public void OnClientDisconnect(int client)
 {
 	_last_heal[client] = 0.0;
+	_last_hurt[client] = 0.0;
 }
 
 public void OnMapStart()
@@ -139,6 +159,7 @@ public void OnMapStart()
 	for (int i = 0; i < sizeof(_last_heal); ++i)
 	{
 		_last_heal[i] = 0.0;
+		_last_hurt[i] = 0.0;
 	}
 }
 
