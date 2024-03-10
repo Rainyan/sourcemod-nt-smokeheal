@@ -7,7 +7,7 @@
 #pragma newdecls required
 
 
-#define PLUGIN_VERSION "0.4.0"
+#define PLUGIN_VERSION "0.5.0"
 
 #define MAX_SMOKES NEO_MAXPLAYERS*2
 #define SMOKE_FADE_DURATION 2.0 // Time it takes for smoke to fully fade in/out
@@ -29,7 +29,7 @@ public Plugin myinfo = {
 	url = "https://github.com/Rainyan/sourcemod-nt-smokeheal"
 };
 
-ConVar _cvar_hps, _cvar_cooldown;
+ConVar _cvar_hps, _cvar_cooldown, _cvar_supheal;
 
 float _last_heal[NEO_MAXPLAYERS+1];
 float _last_hurt[NEO_MAXPLAYERS+1];
@@ -101,6 +101,14 @@ enum struct Smoke {
 			{
 				continue;
 			}
+			// If supports aren't allowed to be healed
+			if (!_cvar_supheal.BoolValue)
+			{
+				if (GetPlayerClass(client) == CLASS_SUPPORT)
+				{
+					continue;
+				}
+			}
 			Heal(client, heal_amount);
 			_last_heal[client] = time;
 		}
@@ -116,6 +124,9 @@ public void OnPluginStart()
 	_cvar_cooldown = CreateConVar("sm_smokeheal_cooldown", "1.0",
 		"Cooldown since player hurt until they can start healing.",
 		_, true, 0.0);
+	_cvar_supheal = CreateConVar("sm_smokeheal_supheal", "1",
+		"Whether or not the support class can be healed.",
+		_, true, 0.0, true, 1.0);
 
 	Handle dd = new DynamicDetour(view_as<Address>(0x22107C40),
 		CallConv_THISCALL, ReturnType_Void, ThisPointer_CBaseEntity);
