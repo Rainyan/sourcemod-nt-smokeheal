@@ -35,7 +35,7 @@ public Plugin myinfo = {
 	url = "https://github.com/Rainyan/sourcemod-nt-smokeheal"
 };
 
-float _last_heal[NEO_MAXPLAYERS];
+float _last_heal[NEO_MAXPLAYERS+1];
 
 enum SmokeStatus {
 	FADE_IN, // Smoke is currently deploying, but not full bloomed yet.
@@ -94,7 +94,7 @@ enum struct Smoke {
 			}
 			// Prevent stacking heals
 			float dt = time - _last_heal[client];
-			if (dt < TIMER_INACCURACY + HEAL_INTERVAL)
+			if (dt < HEAL_INTERVAL - TIMER_INACCURACY)
 			{
 				continue;
 			}
