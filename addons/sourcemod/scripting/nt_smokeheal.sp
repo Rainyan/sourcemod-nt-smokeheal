@@ -7,7 +7,7 @@
 #pragma newdecls required
 
 
-#define PLUGIN_VERSION "0.2.1"
+#define PLUGIN_VERSION "0.3.0"
 
 #define MAX_SMOKES NEO_MAXPLAYERS*2
 #define SMOKE_FADE_DURATION 2.0 // Time it takes for smoke to fully fade in/out
