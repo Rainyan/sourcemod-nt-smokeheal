@@ -189,9 +189,8 @@ public Action Timer_Heal(Handle timer)
 		if (status == EXPIRED)
 		{
 			_smokes.Erase(i--); // TODO: optimize
-			continue;
 		}
-		if (status == FULL_BLOOM)
+		else if (status == FULL_BLOOM)
 		{
 			smoke.RadiusHeal();
 		}
