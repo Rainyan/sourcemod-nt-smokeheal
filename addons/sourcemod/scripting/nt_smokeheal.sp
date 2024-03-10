@@ -7,7 +7,7 @@
 #pragma newdecls required
 
 
-#define PLUGIN_VERSION "0.5.1"
+#define PLUGIN_VERSION "0.5.2"
 
 #define MAX_SMOKES NEO_MAXPLAYERS*2
 #define SMOKE_FADE_DURATION 2.0 // Time it takes for smoke to fully fade in/out
@@ -235,7 +235,18 @@ any Min(any a, any b)
 // Assumes positive healing amount (we don't handle death by "negative heal").
 void Heal(int client, int amount)
 {
-	int health = Min(100, GetEntProp(client, Prop_Send, "m_iHealth") + amount);
+	if (amount <= 0)
+	{
+		return;
+	}
+
+	int health = GetEntProp(client, Prop_Send, "m_iHealth");
+	if (health >= 100)
+	{
+		return;
+	}
+
+	health = Min(100, health + amount);
 	SetEntProp(client, Prop_Send, "m_iHealth", health);
 
 	int color[4] = {
