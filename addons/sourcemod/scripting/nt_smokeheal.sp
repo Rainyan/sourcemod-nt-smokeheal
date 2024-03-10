@@ -7,26 +7,19 @@
 #pragma newdecls required
 
 
-#define PLUGIN_VERSION "0.3.0"
+#define PLUGIN_VERSION "0.4.0"
 
 #define MAX_SMOKES NEO_MAXPLAYERS*2
 #define SMOKE_FADE_DURATION 2.0 // Time it takes for smoke to fully fade in/out
 #define SMOKE_FULL_BLOOM_DURATION 17.5 // The full vision obscure duration
 #define SMOKE_FULL_BLOOM_RADIUS 180.0 // The full vision obscure radius
+
 #define TIMER_INACCURACY 0.1
 
 #define HEAL_INTERVAL 1.0
-#define HEAL_PER_SECOND 5.0
-#define HURT_INTERVAL 1.0 // For how long player mustn't take dmg before they're eligible for healing
 
 #define FFADE_IN 0x1
-#define FFADE_OUT 0x2
-#define FFADE_MODULATE 0x4
 
-#if SOURCEMOD_V_MAJOR > 1 || (SOURCEMOD_V_MAJOR == 1 && SOURCEMOD_V_MINOR >= 11)
-#assert HEAL_INTERVAL > 0.0 // Avoid div by zero
-#assert HEAL_PER_SECOND >= 0.0 // Negative healing is unsupported
-#endif
 
 public Plugin myinfo = {
 	name = "NT Healing Smokes",
@@ -35,6 +28,8 @@ public Plugin myinfo = {
 	version = PLUGIN_VERSION,
 	url = "https://github.com/Rainyan/sourcemod-nt-smokeheal"
 };
+
+ConVar _cvar_hps, _cvar_cooldown;
 
 float _last_heal[NEO_MAXPLAYERS+1];
 float _last_hurt[NEO_MAXPLAYERS+1];
@@ -85,7 +80,7 @@ enum struct Smoke {
 	// Heal every alive client inside this smoke's radius.
 	void RadiusHeal()
 	{
-		int heal_amount = RoundToNearest(HEAL_PER_SECOND / HEAL_INTERVAL);
+		int heal_amount = RoundToNearest(_cvar_hps.FloatValue / HEAL_INTERVAL);
 		float time = GetGameTime();
 		for (int client = 1; client <= MaxClients; ++client)
 		{
@@ -100,9 +95,9 @@ enum struct Smoke {
 			{
 				continue;
 			}
-			// Prevent healing until HURT_INTERVAL since last taking damage
+			// Prevent healing until cooldown since last they were hurt
 			dt = time - _last_hurt[client];
-			if (dt < HURT_INTERVAL - TIMER_INACCURACY)
+			if (dt < _cvar_cooldown.FloatValue - TIMER_INACCURACY)
 			{
 				continue;
 			}
@@ -115,6 +110,13 @@ ArrayList _smokes = null;
 
 public void OnPluginStart()
 {
+	_cvar_hps = CreateConVar("sm_smokeheal_hps", "5.0",
+		"Amount to heal per second.",
+		_, true, 0.0, true, 100.0);
+	_cvar_cooldown = CreateConVar("sm_smokeheal_cooldown", "1.0",
+		"Cooldown since player hurt until they can start healing.",
+		_, true, 0.0);
+
 	Handle dd = new DynamicDetour(view_as<Address>(0x22107C40),
 		CallConv_THISCALL, ReturnType_Void, ThisPointer_CBaseEntity);
 	if (dd == INVALID_HANDLE)
