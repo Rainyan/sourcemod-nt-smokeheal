@@ -13,6 +13,7 @@
 #define SMOKE_FADE_DURATION 2.0 // Time it takes for smoke to fully fade in/out
 #define SMOKE_FULL_BLOOM_DURATION 17.5 // The full vision obscure duration
 #define SMOKE_FULL_BLOOM_RADIUS 180.0 // The full vision obscure radius
+#define TIMER_INACCURACY 0.1
 
 #define HEAL_INTERVAL 1.0
 #define HEAL_PER_SECOND 5.0
@@ -91,9 +92,9 @@ enum struct Smoke {
 			{
 				continue;
 			}
-
+			// Prevent stacking heals
 			float dt = time - _last_heal[client];
-			if (dt < HEAL_INTERVAL)
+			if (dt < TIMER_INACCURACY + HEAL_INTERVAL)
 			{
 				continue;
 			}
