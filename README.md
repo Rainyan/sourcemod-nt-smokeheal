@@ -9,3 +9,6 @@ and ignores teams (i.e. you can heal inside an enemy smoke).
     Download links are at the bottom of the opening post of the AlliedMods thread.
     Be sure to choose the correct one for your SM version! You don't need this if you're using SourceMod 1.11 or newer.
 * The [Neotokyo include](https://github.com/softashell/sourcemod-nt-include/blob/master/scripting/include/neotokyo.inc)
+
+## Usage
+### Cvars
